@@ -118,6 +118,7 @@ class LanguagePack::Ruby < LanguagePack::Base
         build_bundler
         create_database_yml
         install_binaries
+        install_vendored_libraries
         run_assets_precompile_rake_task
       end
       super
@@ -425,6 +426,29 @@ WARNING
   def uninstall_binary(path)
     FileUtils.rm File.join('bin', File.basename(path)), :force => true
   end
+  
+  
+  def install_vendored_libraries    
+
+    return unless File.exists? '.vendor_urls'
+    topic("Vendoring binaries")
+    
+    File.open('.vendor_urls').each do |url|
+      print "Downloading tar from #{url}..."
+      folder_name = File.basename(File.basename(url.strip, '.*'), '.*')
+      Dir.mkdir "vendor/#{folder_name}"
+      Dir.chdir("vendor/#{folder_name}") do
+        run("curl #{url.strip} -s -o - | tar zxf -")
+      end
+      
+      print "done.\n"        
+    end
+    
+    add_to_profiled "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/vendor/libx264/lib:/app/vendor/ffmpeg/lib"
+    add_to_profiled "export PATH=$PATH:/app/vendor/ffmpeg/bin:/app/vendor/libx264/bin"
+    
+  end
+  
 
   def load_default_cache?
     new_app? && ruby_version.default?
