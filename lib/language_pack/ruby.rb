@@ -428,14 +428,14 @@ WARNING
     topic("Vendoring binaries")
     
     File.open('.vendor_urls').each do |url|
-      print "Downloading tar from #{url}..."
+      puts "Downloading tar from #{url}..."
       folder_name = File.basename(File.basename(url.strip, '.*'), '.*')
       Dir.mkdir "vendor/#{folder_name}"
       Dir.chdir("vendor/#{folder_name}") do
         run("curl #{url.strip} -s -o - | tar zxf -")
       end
       
-      print "done.\n"        
+      puts "done.\n"        
     end
     
     add_to_profiled "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/vendor/libx264/lib:/app/vendor/ffmpeg/lib"
